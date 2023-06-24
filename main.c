@@ -29,7 +29,7 @@ void calculate_clear(int *count_size, int *scan_index, int *answer,
   for (i = 0; i <= 15; i++) {
     count_buf[i] = ' ';
   }
-  LCD_ShowString(2, 1, "     ");
+  LCD_ShowString(2, 1, "       ");
 }
 
 void main() {
@@ -38,10 +38,12 @@ void main() {
                                  ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '};
   int count_size = 0;
   int scan_index;
-  int answer = 0;
-  int calculate_buf = 0;
+  unsigned int answer = 0;
+  unsigned int signed_answer;
+  unsigned int calculate_buf = 0;
   unsigned char operator_state = '+';
   unsigned char equal_state = 0;
+  // unsigned int xor_mask = 65535;
   LCD_Init();
   while (1) {
     press_key = scan_matrix_key();
@@ -76,7 +78,13 @@ void main() {
     for (scan_index = 1; scan_index <= 16; scan_index++) {
       LCD_ShowChar(1, scan_index, count_buf[scan_index - 1]);
       if (equal_state) {
-        LCD_ShowNum(2, 1, answer, 5);
+        if (answer < 32768) {
+          LCD_ShowNum(2, 1, answer, 5);
+        } else {
+          signed_answer = (answer ^ (unsigned)65535) + 1;
+          LCD_ShowChar(2, 1, '-');
+          LCD_ShowNum(2, 2, signed_answer, 5);
+        }
       }
     }
   }
